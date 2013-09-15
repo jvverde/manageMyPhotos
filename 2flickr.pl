@@ -4,7 +4,7 @@ use strict;
 use File::Copy;
 use File::Path;
 use Cwd qw{abs_path};
-use Encode qw(decode);
+use Digest::SHA qw(sha256);
 
 $\ = "\n";
 $, ="\t=>\t";
@@ -36,15 +36,27 @@ if ($err and @$err) {
 }
 
 foreach (@files){
-	my $f1 = "$_";
 	my $path = abs_path(qq|$dir/$_|);
+	my $newName = getFileID($path);
+	my $f1 = "$_";
+	$f1 =~ s/(?<=\.)(jpg|nef)$/lc $1/gei;
+	next if -e qq|$dest/$newName.$f1|;
+	$f1 =~ s/[\s()]/\\$&/g;
 	$path =~ s/[\s()]/\\$&/g;
+	print qx|cp -a $path /tmp/$newName.$f1|;
 	my $tag = $path;
 	$tag =~ s/\//\\\\/g;
 	my @localtags = ($tag, grep {/[^\s]/} split /\//, $path);
  	my $tags = join ':', @tags, @localtags;
  	$tags =~ s/[^[:ascii:]]{1,2}/#/g;
- 	my $cmd = "cp $path $dest:$tags/";
-	print $cmd;
-	print qx|$cmd/|;
+	print qx|cp -a /tmp/$newName.$f1 $dest:$tags/|;
+	print qx|rm -f /tmp/$newName.$f1|;
+}
+
+sub getFileID{
+        warn(q|getFileID: File not defined|) and return undef unless defined $_[0];
+        warn(q|getFileID: File not $_[0] found|) and return undef unless -e $_[0];
+        my $sha = Digest::SHA->new();
+        $sha->addfile($_[0],'b');
+        return $sha->hexdigest;
 }

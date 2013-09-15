@@ -28,9 +28,8 @@ sub getFolders{
 	my $dir = shift;
 	print qq|Get dir $dir|;
 	if ($dir =~ $pattern){
-		my $cmd = qq|$path/2flickr.pl "$dir" "$dest" "$pattern" @tags|;
-		print $cmd;
-		print qx|$cmd|;
+		print qq|$path/2flickr.pl "$dir" "$dest" @tags|;
+		print qx|$path/2flickr.pl "$dir" "$dest" @tags|;
 	}else{
 		opendir DIR, $dir or warn qq|Nao foi possivel abrir o directorio $dir| and return;
 		my @subdirs = grep {-d qq|$dir/$_| and $_ ne '.' and $_ ne '..'} readdir DIR;
