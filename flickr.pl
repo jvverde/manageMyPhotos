@@ -71,13 +71,16 @@ sub getFolders{
 	print qq|Get dir $dir|;
 	if ($dir =~ $pattern){
 		backup($dir,@tags);
-	}else{
-		opendir DIR, $dir or warn qq|Nao foi possivel abrir o directorio $dir| and return;
-		my @subdirs = grep {-d qq|$dir/$_| and $_ ne '.' and $_ ne '..'} readdir DIR;
-		closedir DIR;
-		foreach my $subdir (@subdirs){
-			getFolders(qq|$dir/$subdir|);
-		}
+	}
+	getSubFolders($dir);
+}
+sub getSubFolders{
+	my $dir = shift;
+	opendir DIR, $dir or warn qq|Nao foi possivel abrir o directorio $dir| and return;
+	my @subdirs = grep {-d qq|$dir/$_| and $_ ne '.' and $_ ne '..'} readdir DIR;
+	closedir DIR;
+	foreach my $subdir (@subdirs){
+		getFolders(qq|$dir/$subdir|);
 	}
 }
 
